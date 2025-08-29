@@ -21,7 +21,7 @@ members = [
   "crates/common",
   "crates/engine",
   "crates/mdgen",
-  "crates/strategy",
-  "crates/simulator",
-  "crates/gateway",
+#   "crates/strategy",
+#   "crates/simulator",
+#   "crates/gateway",
 ]

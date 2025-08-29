@@ -16,7 +16,6 @@ async fn main() {
     let (tx, _rx ) = broadcast::channel::<String>(1000);
     let tx_clone = tx.clone();
 
-    // Spawn market data generator task
     tokio::spawn(async move {
         let mut generator = MarketDataGenerator::new(100.0, 0.2, 0.01);
         let mut interval = interval(Duration::from_millis(100));
@@ -30,14 +29,11 @@ async fn main() {
             }
         }
     });
-
-    // CORS
     let cors = warp::cors()
         .allow_any_origin()
         .allow_headers(vec!["content-type"])
         .allow_methods(vec!["GET", "POST", "OPTIONS"]);
 
-    // WebSocket route
     let websocket = warp::path("ws")
         .and(warp::ws())
         .and(warp::any().map(move || tx.clone()))
@@ -45,7 +41,6 @@ async fn main() {
             ws.on_upgrade(move |socket| handle_websocket(socket, tx))
         });
 
-    // Static API route for fallback
     let api = warp::path("api")
         .and(warp::path("market-data"))
         .and(warp::get())
@@ -70,7 +65,6 @@ async fn handle_websocket(
     let (mut ws_tx, mut ws_rx) = websocket.split();
     let mut rx = tx.subscribe();
 
-    // Send initial connection message
     let welcome = serde_json::json!({
         "type": "connected",
         "message": "Market data stream connected"
@@ -80,7 +74,6 @@ async fn handle_websocket(
         return;
     }
 
-    // Spawn task to forward broadcast messages to WebSocket
     let tx_task = tokio::spawn(async move {
         while let Ok(data) = rx.recv().await {
             if ws_tx.send(warp::ws::Message::text(data)).await.is_err() {
@@ -89,7 +82,6 @@ async fn handle_websocket(
         }
     });
 
-    // Handle incoming WebSocket messages (ping/pong, etc.)
     let rx_task = tokio::spawn(async move {
         while let Some(result) = ws_rx.next().await {
             match result {
