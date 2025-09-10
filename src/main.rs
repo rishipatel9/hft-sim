@@ -52,8 +52,8 @@ async fn main() {
 
     let routes = websocket.or(api).with(cors);
 
-    println!("🚀 Market data server running at http://localhost:8080");
-    println!("📡 WebSocket endpoint: ws://localhost:8080/ws");
+    println!(" Market data server running at http://localhost:8080");
+    println!(" WebSocket endpoint: ws://localhost:8080/ws");
     
     warp::serve(routes).run(([127, 0, 0, 1], 8080)).await;
 }
